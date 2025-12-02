@@ -52,6 +52,7 @@ get_result_02_part_01 :: proc(filename: string) -> (int, Error) {
 
 	for p in strings.split_iterator(&l, ",") {
 		rs, _ := strings.split(p, "-")
+		defer delete(rs)
 
 		start, ok := strconv.parse_int(rs[0])
 
@@ -81,6 +82,41 @@ get_result_02_part_01 :: proc(filename: string) -> (int, Error) {
 	return count, nil
 }
 
+is_invalid_02 :: proc(id: int) -> bool {
+	s := int_size(id)
+
+	a: for i in 1 ..= s / 2 {
+		if s % i != 0 {
+			continue
+		}
+		m := pow_int(10, i)
+		rest := id / m
+		prev := id - (rest * m)
+
+		for rest > 0 {
+			tmp_rest := rest / m
+			tmp_prev := rest - (tmp_rest * m)
+
+			if (tmp_prev != prev) {
+				continue a
+			}
+			rest = tmp_rest
+			prev = tmp_prev
+		}
+		return true
+	}
+
+	return false
+}
+
+@(test)
+test_is_invalid_02 :: proc(t: ^testing.T) {
+	testing.expect(t, is_invalid_02(11))
+	testing.expect(t, !is_invalid_02(12))
+	testing.expect(t, is_invalid_02(22))
+	testing.expect(t, is_invalid_02(999))
+	testing.expect(t, is_invalid_02(824824824))
+}
 
 get_result_02_part_02 :: proc(filename: string) -> (int, Error) {
 	data, ok := os.read_entire_file(filename, context.allocator)
@@ -89,34 +125,53 @@ get_result_02_part_02 :: proc(filename: string) -> (int, Error) {
 	}
 	defer delete(data, context.allocator)
 
+	count := 0
+	it := string(data)
 
-	return 0, nil
+	l, _ := strings.split_lines_iterator(&it)
+
+	for p in strings.split_iterator(&l, ",") {
+		rs, _ := strings.split(p, "-")
+		defer delete(rs)
+
+		start, ok := strconv.parse_int(rs[0])
+
+		if !ok {
+			return 0, Error.FailedToParseInt
+		}
+		end, ok2 := strconv.parse_int(rs[1])
+		if !ok2 {
+			return 0, Error.FailedToParseInt
+		}
+
+		for i in start ..= end {
+			if (is_invalid_02(i)) {
+				count += i
+			}
+		}
+	}
+
+	return count, nil
+}
+
+@(test)
+test_part_2 :: proc(t: ^testing.T) {
+	res, err := get_result_02_part_02("inputs/02-test01.txt")
+	testing.expect_value(t, err, nil)
+	testing.expect_value(t, 4174379265, res)
 }
 
 day02 :: proc() {
 	fmt.println("=== Day 02 ===")
-	res, err := get_result_02_part_01("inputs/02-test01.txt")
-	if err != nil {
-		panic(fmt.tprintf("test 02 failed: %s", err))
-	}
-	assert(res == 1227775554)
-
-	res, err = get_result_02_part_01("inputs/02.txt")
+	res, err := get_result_02_part_01("inputs/02.txt")
 	if err != nil {
 		panic(fmt.tprintf("test 02 failed: %s", err))
 	}
 	fmt.printfln("part 01: %d", res)
 
-	res, err = get_result_part_02("inputs/02-test01.txt")
-	if err != nil {
-		panic(fmt.tprintf("test 02 failed: %s", err))
-	}
-	assert(res == 4174379265)
-
-	res, err = get_result_part_02("inputs/02.txt")
+	res, err = get_result_02_part_02("inputs/02.txt")
 	if err != nil {
 		panic(fmt.tprintf("test 02 failed: %s", err))
 	}
 	fmt.printfln("part 02: %d", res)
-
 }
