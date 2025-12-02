@@ -82,6 +82,13 @@ get_result_02_part_01 :: proc(filename: string) -> (int, Error) {
 	return count, nil
 }
 
+@(test)
+test_day02_part_1 :: proc(t: ^testing.T) {
+	res, err := get_result_02_part_01("inputs/02-test01.txt")
+	testing.expect_value(t, err, nil)
+	testing.expect_value(t, 1227775554, res)
+}
+
 is_invalid_02 :: proc(id: int) -> bool {
 	s := int_size(id)
 
@@ -155,7 +162,7 @@ get_result_02_part_02 :: proc(filename: string) -> (int, Error) {
 }
 
 @(test)
-test_part_2 :: proc(t: ^testing.T) {
+test_day_02_part_2 :: proc(t: ^testing.T) {
 	res, err := get_result_02_part_02("inputs/02-test01.txt")
 	testing.expect_value(t, err, nil)
 	testing.expect_value(t, 4174379265, res)

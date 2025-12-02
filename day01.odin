@@ -3,6 +3,7 @@ import "core:fmt"
 import "core:os"
 import "core:strconv"
 import "core:strings"
+import "core:testing"
 
 
 Error :: enum {
@@ -10,7 +11,7 @@ Error :: enum {
 	FailedToParseInt,
 }
 
-get_result_part_01 :: proc(filename: string) -> (int, Error) {
+get_result_01_part_01 :: proc(filename: string) -> (int, Error) {
 	data, ok := os.read_entire_file(filename, context.allocator)
 	if !ok {
 		// could not read file
@@ -47,8 +48,14 @@ get_result_part_01 :: proc(filename: string) -> (int, Error) {
 	return count, nil
 }
 
+@(test)
+test_day_01_part_q :: proc(t: ^testing.T) {
+	res, err := get_result_01_part_01("inputs/01-test01.txt")
+	testing.expect_value(t, err, nil)
+	testing.expect_value(t, res, 3)
+}
 
-get_result_part_02 :: proc(filename: string) -> (int, Error) {
+get_result_01_part_02 :: proc(filename: string) -> (int, Error) {
 	data, ok := os.read_entire_file(filename, context.allocator)
 	if !ok {
 		return 0, Error.FailedToOpenFile
@@ -96,30 +103,24 @@ get_result_part_02 :: proc(filename: string) -> (int, Error) {
 	return count, nil
 }
 
+@(test)
+test_day_01_part_2 :: proc(t: ^testing.T) {
+	res, err := get_result_01_part_02("inputs/01-test01.txt")
+	testing.expect_value(t, err, nil)
+	testing.expect_value(t, res, 6)
+}
+
 day01 :: proc() {
 	fmt.println("=== Day 01 ===")
-	res, err := get_result_part_01("inputs/01-test01.txt")
-	if err != nil {
-		panic(fmt.tprintf("test 01 failed: %s", err))
-	}
-	assert(res == 3)
-
-	res, err = get_result_part_01("inputs/01.txt")
+	res, err := get_result_01_part_01("inputs/01.txt")
 	if err != nil {
 		panic(fmt.tprintf("test 01 failed: %s", err))
 	}
 	fmt.printfln("part 01: %d", res)
 
-	res, err = get_result_part_02("inputs/01-test01.txt")
-	if err != nil {
-		panic(fmt.tprintf("test 01 failed: %s", err))
-	}
-	assert(res == 6)
-
-	res, err = get_result_part_02("inputs/01.txt")
+	res, err = get_result_01_part_02("inputs/01.txt")
 	if err != nil {
 		panic(fmt.tprintf("test 01 failed: %s", err))
 	}
 	fmt.printfln("part 02: %d", res)
-
 }
