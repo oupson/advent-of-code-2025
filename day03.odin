@@ -70,7 +70,42 @@ get_result_03_part_02 :: proc(filename: string) -> (int, Error) {
 	defer delete(data, context.allocator)
 
 	count := 0
+	it := string(data)
 
+	for line in strings.split_lines_iterator(&it) {
+		nbr := make([]int, len(line))
+		defer delete(nbr)
+
+		activated := make([]int, 12)
+
+		for c, i in line {
+			d, ok := strconv.digit_to_int(c)
+			if !ok {
+				return 0, Error.FailedToParseInt
+			}
+
+			nbr[i] = d
+		}
+
+
+		prev_index := 0
+		for index_activated in 0 ..< 12 {
+			max_search_index := len(nbr) - (11 - index_activated)
+
+			for index_nbr in prev_index ..< max_search_index {
+				if nbr[index_nbr] > activated[index_activated] {
+					activated[index_activated] = nbr[index_nbr]
+					prev_index = index_nbr + 1
+				}
+			}
+		}
+
+		count_t := 0
+		for c in activated {
+			count_t = count_t * 10 + c
+		}
+		count += count_t
+	}
 
 	return count, nil
 }
