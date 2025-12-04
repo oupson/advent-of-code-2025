@@ -78,9 +78,50 @@ get_result_04_part_02 :: proc(filename: string) -> (int, Error) {
 
 	count := 0
 	it := string(data)
-
+	grid := make([dynamic][]bool, 0)
+	defer {
+		for g in grid {
+			delete(g)
+		}
+		delete(grid)
+	}
 	for line in strings.split_lines_iterator(&it) {
+		grid_line := make([]bool, len(line))
 
+		for c, i in line {
+			grid_line[i] = c == '@'
+		}
+
+		append(&grid, grid_line)
+	}
+
+	for {
+		round := 0
+		for y in 0 ..< len(grid) {
+			line := grid[y]
+			for x in 0 ..< len(line) {
+				if !line[x] {continue}
+
+				count_env := -1
+				for y1 in max(y - 1, 0) ..= min(y + 1, len(grid) - 1) {
+					for x1 in max(x - 1, 0) ..= min(x + 1, len(line) - 1) {
+						if grid[y1][x1] {
+							count_env += 1
+						}
+					}
+				}
+
+				if count_env < 4 {
+					grid[y][x] = false
+					round += 1
+				}
+			}
+		}
+
+		if round == 0 {
+			break
+		}
+		count += round
 	}
 
 	return count, nil
